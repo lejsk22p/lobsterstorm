@@ -2,7 +2,10 @@
 include "base.php"; 
 ?>  
 
-<?php include "SimpleImage.php" ?>
+<?php
+# include "SimpleImage.php" --> now obsolete file (should be deleted)
+include('class.upload.php'); # use class.upload library (http://www.verot.net/php_class_upload.htm)
+?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -76,77 +79,70 @@ include "base.php";
 							// 															var_dump($_POST);
 							// 															var_dump($_FILES);
 							// 														}
-							if($_POST['submit'] && !empty($_POST['username']) && !empty($_POST['itemName']) && !empty($_FILES['pic1']) && !empty($_POST['description'])&& !empty($_POST['price']))
+							if($_POST['submit'] && !empty($_POST['username']) && !empty($_POST['itemName']) && !empty($_FILES['pic']) && !empty($_POST['description'])&& !empty($_POST['price']))
 							{
-								
-								
-								
-								
-								//file handling
-								$allowedExts = array("gif", "jpeg", "jpg", "png","JPG");
-								$fileNameArray=array();
-								for ($i=1; $i<=4; $i++){
-									$picNum="pic".$i;
-									// echo count($_FILES[$picNum]["name"]);
-									if(is_uploaded_file($_FILES[$picNum]['tmp_name'])){
-										$extension = pathinfo($_FILES[$picNum]["name"]);
-										$filename='';
-										// echo $extension["extension"];
-										// echo $picNum;
-										// var_dump($_FILES[$picNum]);
-										
-										if ((($_FILES[$picNum]["type"] == "image/gif")
-										|| ($_FILES[$picNum]["type"] == "image/jpeg")
-										|| ($_FILES[$picNum]["type"] == "image/JPEG")
-										|| ($_FILES[$picNum]["type"] == "image/GIF")
-										|| ($_FILES[$picNum]["type"] == "image/PNG")
-										|| ($_FILES[$picNum]["type"] == "image/jpg")
-										|| ($_FILES[$picNum]["type"] == "image/JPG")
-										|| ($_FILES[$picNum]["type"] == "image/png"))
-										&& in_array($extension["extension"], $allowedExts))
-										{
-											if ($_FILES[$picNum]["error"] > 0)
-										    {
-										    	echo "Error: " . $_FILES[$picNum]["error"] . "<br>";
-										    }
-										  	else
-										    {
+								# as it is multiple uploads, we will parse the $_FILES array to reorganize it into $files
+							    $files = array();
+							    foreach ($_FILES['pics'] as $k => $l) {
+							        foreach ($l as $i => $v) {
+							            if (!array_key_exists($i, $files)) {
+							                $files[$i] = array();
+							            }
+							            $files[$i][$k] = $v;
+							        }
+							    }
 
-										    	//
-										    	
-										    	
-										    	//
+							    j = 0;
+							    foreach ($files as $myFile) { #loop through files
 
-										    	// echo "Upload: " . $_FILES[$picNum]["name"] . "<br>";
-										    	// echo "Type: " . $_FILES[$picNum]["type"] . "<br>";
-										    	// echo "Size: " . ($_FILES[$picNum]["size"] / 1024) . " kB<br>";
-												$filename=date("YmdHis") . rand(10000,99999).".".$extension["extension"];
-												// echo "new file name: " .$filename;
-												if (file_exists("images/itemImages/" . $filename))
-												{
-													echo "images/itemImages/" . $filename . " already exists. ";
-												}
-												else
-												{
-													$namewithoutExt = preg_replace("/\\.[^.\\s]{3,4}$/", "", $filename);
-													// echo $namewithoutExt.'.jpg';
-													
-												   	if(move_uploaded_file($_FILES[$picNum]["tmp_name"],
-												    	"images/itemImages/" . $filename)==TRUE){
-												    		// echo "Stored in: " . "images/itemImages/" . $filename;
-															array_push($fileNameArray,$filename);
-													}
-													if (!copy(	"images/itemImages/" . $filename, 	"images/itemImages/thumb/" . $namewithoutExt.'.jpg')) {
-													    // echo "failed to copy thumb...\n";
-													}
-												}
-										    }
-										}
-										else
-										{
-										  	echo "Invalid file";
-										}
-									}
+							    	if ($j >= 4) { #prevents people from uploading more than four files somehow
+							            echo "<p>Error: Limit four files.</p>";
+							            exit;
+							        }
+							        j++;
+
+								    # verify the file is a GIF, JPEG, or PNG
+							        # this is pretty minimal security and should be upgraded later, but is fine for now.
+							        if (is_uploaded_file($myFile["tmp_name"])) {
+							            $fileType = exif_imagetype($myFile["tmp_name"]);
+							            $allowed = array(IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG);
+							            if (!in_array($fileType, $allowed)) {
+							                echo "<p>Error: Please only upload an image (.gif, .jpg, .png).</p>";
+							                exit;
+							            }
+							        }
+
+								    # now to upload the file
+								    # we create an instance of the class, giving as argument the PHP object
+								    # corresponding to the file field from the form
+								    # All the uploads are accessible from the PHP object $_FILES
+								    $handle = new Upload($myFile);
+
+								    # then we check if the file has been uploaded properly in its *temporary* location in the server (often, it is /tmp)
+								    if ($handle->uploaded) {
+								        $handle->file_new_name_body = ate("YmdHis") . rand(10000,99999); # give the image the desired file name
+
+								        # now, we start the upload 'process'. That is, to copy the uploaded file from its temporary location to the wanted location
+								        # we'll push the file to the folder images/itemImages/
+								        $handle->Process("images/itemImages/");
+
+								        if ($handle->processed) {  # we check if everything went OK
+								            echo "<p>Large image uploaded successfully.</p>";
+								        }
+								        else { # one error occured
+								           echo "<p>Error: Unknown server-side upload error.</p>";
+								        }
+
+								        # now to create the thumbnail
+								        $handle -> image_resize = true;     # turn on resize engine
+								        $handle -> image_x = $thumbwidth;   # scale x to thumbnail width
+								        $handle -> image_ratio_y = true;    # scale y to match ratio with new width
+								        $handle -> Process("images/itemImages/thumb/");           # make image and put it in the thumbnail directory
+
+								        $handle-> Clean(); # we delete the temporary files
+
+								        }
+								    }
 								}
 								
 								$username = mysql_real_escape_string($_POST['username']);
@@ -410,27 +406,27 @@ include "base.php";
                                             <div class="da-form-item large">
 	                                        	<span class="formNote">You can upload the following formats: jpg, jpeg, png, gif</span>
 	
-                                            	<input type="file" id="pic1" name="pic1" class="da-custom-file" />
+                                            	<input type="file" id="pic1" name="pic[]" class="da-custom-file" />
                                             </div>
                                         </div>
                                         <div class="da-form-row">
                                             <label>Picture 2 (optional) </label>
                                             <div class="da-form-item large">
-                                            	<input type="file" id="pic2" name="pic2" class="da-custom-file" />
+                                            	<input type="file" id="pic2" name="pic[]" class="da-custom-file" />
                                                 <label for="pic2" class="error" generated="true" style="display:none;"></label>
                                             </div>
                                         </div>
                                         <div class="da-form-row">
                                             <label>Picture 3 (optional)</label>
                                             <div class="da-form-item large">
-                                            	<input type="file" id="pic3" name="pic3" class="da-custom-file" />
+                                            	<input type="file" id="pic3" name="pic[]" class="da-custom-file" />
                                                 <label for="pic3" class="error" generated="true" style="display:none;"></label>
                                             </div>
                                         </div>
                                         <div class="da-form-row">
                                             <label>Picture 4 (optional)</label>
                                             <div class="da-form-item large">
-                                            	<input type="file" id="pic4" name="pic4" class="da-custom-file" />
+                                            	<input type="file" id="pic4" name="pic[]" class="da-custom-file" />
                                                 <label for="pic4" class="error" generated="true" style="display:none;"></label>
                                             </div>
                                         </div>
