@@ -135,7 +135,7 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 
 								        # now to create the thumbnail
 								        $handle -> image_resize = true;     # turn on resize engine
-								        $handle -> image_x = $thumbwidth;   # scale x to thumbnail width
+								        $handle -> image_x = 300;   # scale x to thumbnail width
 								        $handle -> image_ratio_y = true;    # scale y to match ratio with new width
 								        $handle -> Process("images/itemImages/thumb/");           # make image and put it in the thumbnail directory
 
