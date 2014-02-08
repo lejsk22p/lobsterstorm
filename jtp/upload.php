@@ -3,7 +3,6 @@ include "base.php";
 ?>  
 
 <?php
-# include "SimpleImage.php" --> now obsolete file (should be deleted)
 include('class.upload.php'); # use class.upload library (http://www.verot.net/php_class_upload.htm)
 ?>
 
@@ -126,6 +125,7 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 								        $handle -> image_resize = true;     # turn on resize engine
 								        $handle -> image_x = 300;   		# scale x to thumbnail width
 								        $handle -> image_ratio_y = true;    # scale y to match ratio with new width
+								        $handle -> file_new_name_body = $imgname[$j];
 								        $handle -> Process("images/itemImages/thumb/");           # make image and put it in the thumbnail directory
 
 								        $handle-> Clean(); # we delete the temporary files
@@ -246,129 +246,25 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 									$negotiable=1;
 									// echo" negotiable";
 								}
-								// 
-								// echo $username;
-								// echo $itemName;
-								// echo $pic2;
-								// echo $pic3;
-								// echo $pic4;
-								// echo $description;
-								// echo $price;
+
 								$categoriesChosenjq='';
 								for($i = 1; $i < count($categoriesChosen); $i++){
 									$categoriesChosenjq=$categoriesChosenjq.$categoriesChosen[$i].',';
 								}
-								
-								if($categoriesChosen[0] == 'accessories'){
 
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypeacc) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."', 'accessories','".$categoriesChosenjq."')");	
-						     		if($registerquery)
-									{
-										echo "<h1>Success</h1>";
-										echo "<p>Your item is now listed on Jorge's Trading Post!</p>";
-									}
-									else
-									{
-						     			echo "<h1>Error</h1>";
-										echo "<p>Oooops... Something went wrong. Your item is not successfully listed.</p>";
-						
-									    die('Invalid query: ' . mysql_error());
-									}    	
+								if($categoriesChosen[0] == 'accessories' || $categoriesChosen[0] == 'shoes') { $category_type = 'accessories'; }
+								else { $category_type = $categoriesChosen[0]; }
+
+								$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypebook) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."', '" . $category_type . "','".$categoriesChosenjq."')");	
+						     	if($registerquery) {
+									echo "<h1>Success</h1>";
+									echo "<p>Your item is now listed on Jorge's Trading Post!</p>";
+								}
+								else {
+						     		echo "<h1>Error</h1>";
+									echo "<p>Oooops... Something went wrong. Your item is not successfully listed.</p>";
+									die('Invalid query: ' . mysql_error());    	
 			     				}
-								if($categoriesChosen[0] == 'shoes'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypeacc) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."', 'accessories','".$categoriesChosenjq."')");	
-						     		if($registerquery)
-									{
-										echo "<h1>Success</h1>";
-										echo "<p>Your item is now listed on Jorge's Trading Post!</p>";
-									}
-									else
-									{
-						     			echo "<h1>Error</h1>";
-										echo "<p>Oooops... Something went wrong. Your item is not successfully listed.</p>";
-						
-									    die('Invalid query: ' . mysql_error());
-									}    	
-			     				}
-								if($categoriesChosen[0] == 'clothing'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypeclothing) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."','clothing','".$categoriesChosenjq."')");	
-						     		if($registerquery)
-									{
-										echo "<h1>Success</h1>";
-										echo "<p>Your item is now listed on Jorge's Trading Post!</p>";
-									}
-									else
-									{
-										echo "in clothing";
-						     			echo "<h1>Error</h1>";
-										echo "<p>Oooops... Something went wrong. Your item is not successfully listed.</p>";
-						
-									    die('Invalid query: ' . mysql_error());
-									}    	
-			     				}
-								if($categoriesChosen[0] == 'bags'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypebags) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."','bags','".$categoriesChosenjq."')");	
-						     		if($registerquery)
-									{
-										echo "<h1>Success</h1>";
-										echo "<p>Your item is now listed on Jorge's Trading Post!</p>";
-									}
-									else
-									{
-						     			echo "<h1>Error</h1>";
-										echo "<p>Oooops... Something went wrong. Your item is not successfully listed.</p>";
-						
-									    die('Invalid query: ' . mysql_error());
-									}    	
-			     				}
-								if($categoriesChosen[0] == 'jewelry'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypejewelry) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."', 'jewelry','".$categoriesChosenjq."')");	
-						     		if($registerquery)
-									{
-										echo "<h1>Success</h1>";
-										echo "<p>Your item is now listed on Jorge's Trading Post!</p>";
-									}
-									else
-									{
-						     			echo "<h1>Error</h1>";
-										echo "<p>Oooops... Something went wrong. Your item is not successfully listed.</p>";
-						
-									    die('Invalid query: ' . mysql_error());
-									}    	
-			     				}
-								if($categoriesChosen[0] == 'dorm'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypedorm) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."','dorm','".$categoriesChosenjq."')");	
-						     		if($registerquery)
-									{
-										echo "<h1>Success</h1>";
-										echo "<p>Your item is now listed on Jorge's Trading Post!</p>";
-									}
-									else
-									{
-						     			echo "<h1>Error</h1>";
-										echo "<p>Oooops... Something went wrong. Your item is not successfully listed.</p>";
-						
-									    die('Invalid query: ' . mysql_error());
-									}    	
-			     				}
-								if($categoriesChosen[0] == 'books'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypebook) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."', 'books','".$categoriesChosenjq."')");	
-						     		if($registerquery)
-									{
-										echo "<h1>Success</h1>";
-										echo "<p>Your item is now listed on Jorge's Trading Post!</p>";
-									}
-									else
-									{
-						     			echo "<h1>Error</h1>";
-										echo "<p>Oooops... Something went wrong. Your item is not successfully listed.</p>";
-						
-									    die('Invalid query: ' . mysql_error());
-									}    	
-			     				}
-			
-								
-								
 							}
 							else{
 								?>
