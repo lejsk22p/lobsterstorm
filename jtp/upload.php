@@ -74,16 +74,11 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
                                 </span>
                             </div>
 							<?php
-							// if($_POST['submit']){
-							// 															echo "<pre>";
-							// 															var_dump($_POST);
-							// 															var_dump($_FILES);
-							// 														}
-							if($_POST['submit'] && !empty($_POST['username']) && !empty($_POST['itemName']) && !empty($_FILES['pic']) && !empty($_POST['description'])&& !empty($_POST['price']))
+							if(isset($_POST['submit']) && !empty($_POST['username']) && !empty($_POST['itemName']) && !empty($_FILES['pic']) && !empty($_POST['description'])&& !empty($_POST['price']))
 							{
 								# as it is multiple uploads, we will parse the $_FILES array to reorganize it into $files
 							    $files = array();
-							    foreach ($_FILES['pics'] as $k => $l) {
+							    foreach ($_FILES['pic'] as $k => $l) {
 							        foreach ($l as $i => $v) {
 							            if (!array_key_exists($i, $files)) {
 							                $files[$i] = array();
@@ -92,14 +87,14 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 							        }
 							    }
 
-							    j = 0;
+							    $j = 0; # counter used to index files
+							    $imgname = Array("", "", "", "");
 							    foreach ($files as $myFile) { #loop through files
 
 							    	if ($j >= 4) { #prevents people from uploading more than four files somehow
 							            echo "<p>Error: Limit four files.</p>";
 							            exit;
 							        }
-							        j++;
 
 								    # verify the file is a GIF, JPEG, or PNG
 							        # this is pretty minimal security and should be upgraded later, but is fine for now.
@@ -120,22 +115,16 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 
 								    # then we check if the file has been uploaded properly in its *temporary* location in the server (often, it is /tmp)
 								    if ($handle->uploaded) {
-								        $handle->file_new_name_body = ate("YmdHis") . rand(10000,99999); # give the image the desired file name
+								    	$imgname[$j] = date("YmdHis") . rand(10000,99999); # give the image the desired file name
+								        $handle->file_new_name_body = $imgname[$j];
 
 								        # now, we start the upload 'process'. That is, to copy the uploaded file from its temporary location to the wanted location
 								        # we'll push the file to the folder images/itemImages/
 								        $handle->Process("images/itemImages/");
 
-								        if ($handle->processed) {  # we check if everything went OK
-								            echo "<p>Large image uploaded successfully.</p>";
-								        }
-								        else { # one error occured
-								           echo "<p>Error: Unknown server-side upload error.</p>";
-								        }
-
 								        # now to create the thumbnail
 								        $handle -> image_resize = true;     # turn on resize engine
-								        $handle -> image_x = 300;   # scale x to thumbnail width
+								        $handle -> image_x = 300;   		# scale x to thumbnail width
 								        $handle -> image_ratio_y = true;    # scale y to match ratio with new width
 								        $handle -> Process("images/itemImages/thumb/");           # make image and put it in the thumbnail directory
 
@@ -143,7 +132,7 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 
 								        }
 								    }
-								}
+								$j++; #increment counter
 								
 								$username = mysql_real_escape_string($_POST['username']);
 								$itemName = mysql_real_escape_string($_POST['itemName']);
@@ -269,8 +258,10 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 								for($i = 1; $i < count($categoriesChosen); $i++){
 									$categoriesChosenjq=$categoriesChosenjq.$categoriesChosen[$i].',';
 								}
+								
 								if($categoriesChosen[0] == 'accessories'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypeacc) VALUES('".$username."', '".$itemName."', '".$fileNameArray[0]."', '".$fileNameArray[1]."', '".$fileNameArray[2]."', '".$fileNameArray[3]."', '".$description."', '".$price."', '".$negotiable."', 'accessories','".$categoriesChosenjq."')");	
+
+									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypeacc) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."', 'accessories','".$categoriesChosenjq."')");	
 						     		if($registerquery)
 									{
 										echo "<h1>Success</h1>";
@@ -285,7 +276,7 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 									}    	
 			     				}
 								if($categoriesChosen[0] == 'shoes'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypeshoes) VALUES('".$username."', '".$itemName."', '".$fileNameArray[0]."', '".$fileNameArray[1]."', '".$fileNameArray[2]."', '".$fileNameArray[3]."', '".$description."', '".$price."', '".$negotiable."', 'shoes','".$categoriesChosenjq."')");	
+									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypeacc) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."', 'accessories','".$categoriesChosenjq."')");	
 						     		if($registerquery)
 									{
 										echo "<h1>Success</h1>";
@@ -300,7 +291,7 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 									}    	
 			     				}
 								if($categoriesChosen[0] == 'clothing'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypeclothing) VALUES('".$username."', '".$itemName."', '".$fileNameArray[0]."', '".$fileNameArray[1]."', '".$fileNameArray[2]."', '".$fileNameArray[3]."', '".$description."', '".$price."', '".$negotiable."','clothing','".$categoriesChosenjq."')");	
+									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypeclothing) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."','clothing','".$categoriesChosenjq."')");	
 						     		if($registerquery)
 									{
 										echo "<h1>Success</h1>";
@@ -316,7 +307,7 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 									}    	
 			     				}
 								if($categoriesChosen[0] == 'bags'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypebags) VALUES('".$username."', '".$itemName."', '".$fileNameArray[0]."', '".$fileNameArray[1]."', '".$fileNameArray[2]."', '".$fileNameArray[3]."', '".$description."', '".$price."', '".$negotiable."','bags','".$categoriesChosenjq."')");	
+									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypebags) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."','bags','".$categoriesChosenjq."')");	
 						     		if($registerquery)
 									{
 										echo "<h1>Success</h1>";
@@ -331,7 +322,7 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 									}    	
 			     				}
 								if($categoriesChosen[0] == 'jewelry'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypejewelry) VALUES('".$username."', '".$itemName."', '".$fileNameArray[0]."', '".$fileNameArray[1]."', '".$fileNameArray[2]."', '".$fileNameArray[3]."', '".$description."', '".$price."', '".$negotiable."', 'jewelry','".$categoriesChosenjq."')");	
+									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypejewelry) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."', 'jewelry','".$categoriesChosenjq."')");	
 						     		if($registerquery)
 									{
 										echo "<h1>Success</h1>";
@@ -346,7 +337,7 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 									}    	
 			     				}
 								if($categoriesChosen[0] == 'dorm'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypedorm) VALUES('".$username."', '".$itemName."', '".$fileNameArray[0]."', '".$fileNameArray[1]."', '".$fileNameArray[2]."', '".$fileNameArray[3]."', '".$description."', '".$price."', '".$negotiable."','dorm','".$categoriesChosenjq."')");	
+									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypedorm) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."','dorm','".$categoriesChosenjq."')");	
 						     		if($registerquery)
 									{
 										echo "<h1>Success</h1>";
@@ -361,7 +352,7 @@ include('class.upload.php'); # use class.upload library (http://www.verot.net/ph
 									}    	
 			     				}
 								if($categoriesChosen[0] == 'books'){
-									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypebook) VALUES('".$username."', '".$itemName."', '".$fileNameArray[0]."', '".$fileNameArray[1]."', '".$fileNameArray[2]."', '".$fileNameArray[3]."', '".$description."', '".$price."', '".$negotiable."', 'books','".$categoriesChosenjq."')");	
+									$registerquery = mysql_query("INSERT INTO items (Fuser, Fname, Fp1, Fp2, Fp3, Fp4, Fdescription, Fprice, Fnegotiable, Fcat, Ftypebook) VALUES('".$username."', '".$itemName."', '".$imgname[0]."', '".$imgname[1]."', '".$imgname[2]."', '".$imgname[3]."', '".$description."', '".$price."', '".$negotiable."', 'books','".$categoriesChosenjq."')");	
 						     		if($registerquery)
 									{
 										echo "<h1>Success</h1>";
