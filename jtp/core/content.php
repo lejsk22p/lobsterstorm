@@ -19,46 +19,18 @@
                                 echo'           <center>
                                                 <ul>';
                                 echo'               <div class="imageThumbs">';
-                                echo '            <a href="images/itemImages/';
-                                echo $row["Fp1"];
-                                echo '">';
-                                echo '   <img style="padding-right:10px; padding-bottom:10px" width="200px" src="images/itemImages/thumb/';
-                                $p1withoutExt = preg_replace("/\\.[^.\\s]{3,4}$/", "", $row["Fp1"]);
-                                echo $p1withoutExt.'.jpg';
-                                echo '" alt="" />';
-                                echo '</a>';
-                            if($row["Fp2"]!=""){
-                                echo '            <a href="images/itemImages/';
-                                echo $row["Fp2"];
-                                echo '">';
-                                echo '   <img style="padding-right:10px; padding-bottom:10px" width="200px" src="images/itemImages/thumb/';
-                                $p1withoutExt = preg_replace("/\\.[^.\\s]{3,4}$/", "", $row["Fp2"]);
-                                echo $p1withoutExt.'.jpg';
-                                echo '" alt="" />';
-                                echo '</a>';
-                            }
-                            if($row["Fp3"]!=""){
-                            
-                                echo '            <a href="images/itemImages/';
-                                echo $row["Fp3"];
-                                echo '">';
-                                echo '   <img style="padding-right:10px; padding-bottom:10px" width="200px" src="images/itemImages/thumb/';
-                                $p1withoutExt = preg_replace("/\\.[^.\\s]{3,4}$/", "", $row["Fp3"]);
-                                echo $p1withoutExt.'.jpg';
-                                echo '" alt="" />';
-                                echo '</a>';
-                            }
-                            if($row["Fp4"]!=""){
-                            
-                                echo '            <a href="images/itemImages/';
-                                echo $row["Fp4"];
-                                echo '">';
-                                echo '   <img style="padding-right:10px; padding-bottom:10px" width="200px" src="images/itemImages/thumb/';
-                                $p1withoutExt = preg_replace("/\\.[^.\\s]{3,4}$/", "", $row["Fp4"]);
-                                echo $p1withoutExt.'.jpg';
-                                    echo '" alt="" />';
-                                    echo '</a>';
+
+                                # fixed some code bloat here by iterating over an array instead of having separate code for each image
+                                $img_possible = array("Fp1", "Fp2", "Fp3", "Fp4");  # list all the possible images
+                                foreach ($img_possible as $img_try) {               # iterate over all the possible images
+                                    $img_row = $row[$img_try];
+                                    if ($img_row != "") {                           # test to make sure the image exists
+                                                                                    # if it does, display code for it
+                                        echo "            <a href=\"images/itemImages/$img_row.jpg\">";
+                                        echo "  <img style=\"padding-right:10px; padding-bottom:10px\" width=\"200px\" src=\"images/itemImages/thumb/$img_row.jpg\" alt=\"\"></a>";
+                                    }
                                 }
+
                                 echo '      </div>';
                                 echo '  </ul>';
                                 echo '  </center>';
